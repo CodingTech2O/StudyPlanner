@@ -58,8 +58,9 @@ Each subject's allocated hours (weighted by weakness and exam date) are placed o
 - **Exam eve:** 10% of a subject's hours are kept for the day before its exam.
 - **Day 1, 3, 5, ... (focus, 8:2):** the subject with the most hours left gets 80% of the day, the subject with the fewest hours left gets 20%.
 - **Day 2, 4, 6, ... (revision, 3:7):** 30% of the day revises your weakest subject, 70% studies the subject with the most hours left (if that's the same subject, the next one down gets the 70%).
-- **Day length:** the hours still to place divided by the days still to go, so everything is finished by the last exam eve.
-- **Catch-up:** the split above doesn't look at exam dates, so a subject whose exam comes early can run out of days. Its leftover hours are shown as a red *Catch-up* block on its exam eve.
+- **Day length:** each day is as long as it needs to be for every subject to still finish before its own exam eve. Days can get shorter as the plan goes on, never longer, so nothing is left to cram at the end.
+- **Adjusted days:** the splits above don't look at exam dates. When a split would leave a subject with an earlier exam short of time, minutes move to it from the subjects with later exams, only as many as needed, and the day is marked *adjusted*. If an exam is close and needs most of your time, that day can end up almost entirely one subject.
+- **Catch-up:** only if an exam is tomorrow (or today) is there no earlier day for a subject's hours; they're then shown as a red *Catch-up* block on its exam eve.
 
 The rules live in constants at the top of `planner.py` (`EXAM_EVE_SHARE`, `FOCUS_DAY_SPLIT`, `REVISION_DAY_SPLIT`).
 

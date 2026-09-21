@@ -69,11 +69,13 @@
                         Days alternate between an 8:2 focus split (most hours left : fewest hours left)
                         and a 3:7 split (revise your weakest subject : study the one with the most hours left).
                         Each subject keeps 10% of its hours for the day before its exam.
+                        When a split would leave an earlier exam short of time, that day is marked <em>adjusted</em>
+                        and the earlier exam gets more of it, so every subject is finished before its exam.
                     </p>
                     {% if has_catch_up %}
                         <p class="schedule-note">
-                            Some hours didn't fit before their exam, so they're added to that subject's exam eve as <strong>Catch-up</strong>.
-                            Giving more hours per day, or adding subjects earlier, avoids this.
+                            An exam is tomorrow (or today), so there's no earlier day for some hours.
+                            They're added to that subject's exam eve as <strong>Catch-up</strong>.
                         </p>
                     {% endif %}
                 </div>
@@ -101,7 +103,11 @@
 
                             <div class="day-total">
                                 <span class="day-total-time">{{ day['Minutes']|duration }}</span>
-                                {% if day['Split'] %}<span class="day-split">{{ day['Split'] }}</span>{% endif %}
+                                {% if day['Split'] %}
+                                    <span class="day-split{% if day['Shifted'] %} day-split-shifted{% endif %}">
+                                        {{ day['Split'] }}{% if day['Shifted'] %} adjusted{% endif %}
+                                    </span>
+                                {% endif %}
                             </div>
                         </li>
                     {% endfor %}

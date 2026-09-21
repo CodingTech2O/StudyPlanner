@@ -58,10 +58,15 @@ def build_daily_schedule(plan, today=None):
       with the most hours left is studied, REVISION_DAY_SPLIT. If that is the
       same subject, the study slot goes to the one with the next most hours.
 
-    A day's length is the hours still to place divided by the days still to go, so
-    the plan finishes on the last exam eve. Time is counted in whole minutes so a
-    subject's blocks add up to its allocated hours exactly. Hours a subject could
-    not get in before its own exam eve land on that day as a "Catch-up" block.
+    Those splits don't know about exam dates, so each day is also checked against
+    them: _day_length makes the day long enough for every subject to finish before
+    its own exam eve, and _protect_deadlines nudges the split, only as much as
+    needed, when it would leave an early exam short. A day marked "Shifted" had
+    its split nudged that way.
+
+    Time is counted in whole minutes so a subject's blocks add up to its allocated
+    hours exactly. The only hours that can't be placed earlier are those of an exam
+    that is today or tomorrow; they land on its eve as a "Catch-up" block.
     """
     if not plan:
         return []
@@ -96,17 +101,24 @@ def build_daily_schedule(plan, today=None):
                 s["left"] = 0
 
         split = None
+        shifted = False
         active = [s for s in subjects if s["eve"] > day and s["left"] > 0]
         if active:
             focus_day = offset % 2 == 0
             split = FOCUS_DAY_SPLIT if focus_day else REVISION_DAY_SPLIT
-            days_left = (last_eve - day).days
-            budget = -(-sum(s["left"] for s in active) // days_left)  # ceiling division
-            blocks += _spend(active, _day_requests(active, budget, focus_day), budget)
+
+            budget = _day_length(active, day)
+            shares = _split_day(active, budget, focus_day)
+            shifted = _protect_deadlines(active, shares, budget, day)
+            for s, kinds in zip(active, shares):
+                for kind, minutes in kinds.items():
+                    s["left"] -= minutes
+                    _add_block(blocks, s, kind, minutes)
 
         schedule.append({
             "Date": day,
             "Split": f"{split[0]}:{split[1]}" if split else None,
+            "Shifted": shifted,
             "Blocks": blocks,
             "Minutes": sum(b["Minutes"] for b in blocks),
         })
@@ -119,16 +131,32 @@ def _by_hours_left(subject):
     return (-subject["left"], subject["eve"])
 
 
+def _day_length(active, day):
+    """How many minutes today should be.
+
+    Every exam eve is a deadline: the subjects due by then still need some
+    minutes and have some days left (today included), so today has to be at least
+    minutes / days. The longest of those is the day. That makes days shorter as
+    the plan goes on, never longer, so nothing is left to cram at the end.
+    """
+    length = 0
+    for eve in {s["eve"] for s in active}:
+        needed = sum(s["left"] for s in active if s["eve"] <= eve)
+        length = max(length, -(-needed // (eve - day).days))  # ceiling division
+    return length
+
+
 def _day_requests(active, budget, focus_day):
-    """The two (subject, minutes, kind) slots a day's budget is split into."""
-    by_hours = sorted(active, key=_by_hours_left)
+    """The two (index into active, minutes, kind) slots a day's budget is split into."""
+    everyone = range(len(active))
+    by_hours = sorted(everyone, key=lambda i: _by_hours_left(active[i]))
 
     if focus_day:
         first, second = by_hours[0], by_hours[-1]
         kinds, split = ("Study", "Study"), FOCUS_DAY_SPLIT
     else:
-        first = min(active, key=lambda s: (s["strength"], s["eve"]))
-        others = [s for s in by_hours if s is not first]
+        first = min(everyone, key=lambda i: (active[i]["strength"], active[i]["eve"]))
+        others = [i for i in by_hours if i != first]
         second = others[0] if others else first
         kinds, split = ("Revision", "Study"), REVISION_DAY_SPLIT
 
@@ -136,26 +164,68 @@ def _day_requests(active, budget, focus_day):
     return [(first, first_minutes, kinds[0]), (second, budget - first_minutes, kinds[1])]
 
 
-def _spend(active, requests, budget):
-    """Turn requests into blocks, never taking more than a subject has left.
+def _split_day(active, budget, focus_day):
+    """Share budget out by the day's split.
 
-    Minutes a subject can't cover because it ran out go to whoever has the most
-    left, so the day still adds up to budget.
+    Returns {"Study": minutes, "Revision": minutes} for each active subject. A
+    subject never gets more than it has left; what it can't take goes to whoever
+    has the most left, so budget is used up whenever there's enough to use.
     """
-    blocks = []
-    for subject, minutes, kind in requests:
-        taken = min(minutes, subject["left"])
-        subject["left"] -= taken
-        _add_block(blocks, subject, kind, taken)
+    shares = [{"Study": 0, "Revision": 0} for _ in active]
+    spent = 0
 
-    shortfall = budget - sum(b["Minutes"] for b in blocks)
-    for subject in sorted(active, key=_by_hours_left):
-        taken = min(shortfall, subject["left"])
-        subject["left"] -= taken
-        shortfall -= taken
-        _add_block(blocks, subject, "Study", taken)
+    def give(i, kind, minutes):
+        nonlocal spent
+        taken = min(minutes, active[i]["left"] - sum(shares[i].values()), budget - spent)
+        shares[i][kind] += taken
+        spent += taken
 
-    return blocks
+    for i, minutes, kind in _day_requests(active, budget, focus_day):
+        give(i, kind, minutes)
+    for i in sorted(range(len(active)), key=lambda i: _by_hours_left(active[i])):
+        give(i, "Study", budget - spent)
+
+    return shares
+
+
+def _protect_deadlines(active, shares, budget, day):
+    """Move minutes between subjects so every exam eve can still be reached.
+
+    Take the subjects whose eve is on or before some date. On the days after
+    today they can do at most one budget a day, so whatever they need beyond that
+    has to be done today. If the split gave them less, the shortfall comes off the
+    subjects with the latest exams and goes to the earliest ones.
+
+    The group of everyone needs no check, since the day spends the whole budget.
+    Returns whether any minutes were moved.
+    """
+    def given(i):
+        return sum(shares[i].values())
+
+    moved = 0
+    for eve in sorted({s["eve"] for s in active})[:-1]:
+        group = [i for i, s in enumerate(active) if s["eve"] <= eve]
+        others = [i for i, s in enumerate(active) if s["eve"] > eve]
+
+        must_do = sum(active[i]["left"] for i in group) - budget * ((eve - day).days - 1)
+        short = must_do - sum(given(i) for i in group)
+        if short <= 0:
+            continue
+
+        freed = 0
+        for i in sorted(others, key=lambda i: active[i]["eve"], reverse=True):
+            for kind in ("Study", "Revision"):
+                cut = min(short - freed, shares[i][kind])
+                shares[i][kind] -= cut
+                freed += cut
+
+        for i in sorted(group, key=lambda i: active[i]["eve"]):
+            extra = min(freed, active[i]["left"] - given(i))
+            shares[i]["Study"] += extra
+            freed -= extra
+            moved += extra
+
+    return moved > 0
 
 
 def _add_block(blocks, subject, kind, minutes):

@@ -475,6 +475,10 @@ a:hover {
     color: var(--color-muted);
 }
 
+.day-split-shifted {
+    color: var(--color-warn);
+}
+
 /* ---------- Empty state ---------- */
 .empty-state {
     text-align: center;
