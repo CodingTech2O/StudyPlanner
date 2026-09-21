@@ -1,17 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add a subject</title>
-</head>
-<body>
-    <form method="post">
-        {{form.hidden_tag()}}
-        {{form.subject.label}}{{form.subject}}
-        {{form.strength.label}}{{form.strength}}
-        {{form.date_of_exam.label}}{{form.date_of_exam}}
-        {{form.submit()}}
+{% extends "base.html" %}
+{% block title %}Add Topic &mdash; Study Planner{% endblock %}
+{% block content %}
+
+<section class="form-card animate-in">
+    <a class="back-link" href="{{ url_for('index') }}">&larr; Back to dashboard</a>
+    <h1>Add a subject</h1>
+    <p class="muted">Add a subject to your plan and rate how confident you feel about it.</p>
+
+    <form method="post" class="stacked-form" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="field">
+            {{ form.subject.label }}
+            {{ form.subject(placeholder="e.g. Chemistry") }}
+        </div>
+
+        <div class="field">
+            {{ form.strength.label }}
+            <div class="slider-row">
+                {{ form.strength(class="strength-slider", id="strength-slider") }}
+                <span class="slider-value" id="strength-value">3</span>
+            </div>
+        </div>
+
+        <div class="field">
+            {{ form.date_of_exam.label }}
+            {{ form.date_of_exam }}
+        </div>
+
+        {{ form.submit(class="btn btn-primary") }}
     </form>
-</body>
-</html>
+</section>
+
+{% endblock %}

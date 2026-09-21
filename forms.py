@@ -3,10 +3,15 @@ from flask_wtf import FlaskForm
 
 class TopicForm(FlaskForm):
     subject = StringField("Subject: ")
-    strength = IntegerField("1-5: ")
+    strength = IntegerRangeField(
+        "1-5: ",
+        render_kw={"min": 1, "max": 5, "value": 3}
+    )
     date_of_exam = DateField("Exam Date")
     submit = SubmitField("Submit ")
 
+
 class TotalStudyTime(FlaskForm):
-    time = IntegerRangeField("Time you can give")
-    submit = SubmitField("Submit ")
+    time = IntegerField(
+        "Time you can give in hrs",   )
+    submit = SubmitField("Submit")

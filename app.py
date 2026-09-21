@@ -1,26 +1,38 @@
 import json
 from flask import Flask, render_template, redirect, url_for
 import os
+from dotenv import load_dotenv
 from forms import TopicForm, TotalStudyTime
 
+load_dotenv()
+
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key-change-me")
 
 total_time_to_study = 0
 
-
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
+    global total_time_to_study
+
     with open("data/topics.json", "r") as f:
         data = json.load(f)
+
+    form = None
+
     if total_time_to_study == 0:
         form = TotalStudyTime()
+
         if form.validate_on_submit():
             total_time_to_study = form.time.data
-        return render_template("index.html",data=data,form=form)
+            return redirect(url_for("index"))
 
-    return render_template("index.html",data=data)
-
+    return render_template(
+        "index.html",
+        data=data,
+        form=form,
+        total_time_to_study=total_time_to_study
+    )
 
 @app.route("/add_topic", methods=["GET", "POST"])
 def add():

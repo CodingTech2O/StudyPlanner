@@ -1,20 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Planner</title>
-</head>
-<body>
-    
-    {% for d in data %}
-        <p>Subject: {{d['Subject']}}</p>
-        <p>Strength: {{d['Strength'] * 20}}%</p>
-        <p>Date of Exam: {{d['Date of Exam']}}</p>
-        <p><a href="{{d['Delete URL']}}">Delete</a></p>
+{% extends "base.html" %}
+{% block title %}Dashboard &mdash; Study Planner{% endblock %}
+{% block content %}
 
-    {% endfor %}
-    <a href="{{url_for('add')}}">Add Topic</a>
-        
-</body>
-</html>
+{% if form %}
+    <section class="onboarding-card animate-in">
+        <h1>How much time can you give?</h1>
+        <p class="muted">Tell us how many hours you can study in total, and we'll help you track your subjects against it.</p>
+        <form method="POST" class="stacked-form">
+            {{ form.hidden_tag() }}
+            <div class="field">
+                {{ form.time.label }}
+                {{ form.time(placeholder="e.g. 20") }}
+            </div>
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    </section>
+{% else %}
+
+    <section class="dashboard-head animate-in">
+        <div>
+            <h1>Your subjects</h1>
+            <p class="muted">Track your confidence in each subject as your exams approach.</p>
+        </div>
+        {% if total_time_to_study %}
+            <div class="stat-card">
+                <span class="stat-value">{{ total_time_to_study }}</span>
+                <span class="stat-label">hours pledged</span>
+            </div>
+        {% endif %}
+    </section>
+
+    {% if data %}
+        <div class="topic-grid">
+            {% for d in data %}
+                <article class="topic-card animate-in" style="--stagger: {{ loop.index }};">
+                    <div class="topic-card-top">
+                        <h2 class="topic-subject">{{ d['Subject'] }}</h2>
+                        <a class="delete-link" href="{{ d['Delete URL'] }}" aria-label="Delete {{ d['Subject'] }}" title="Delete topic">&times;</a>
+                    </div>
+
+                    <div class="progress-row">
+                        <div class="progress-track">
+                            <div class="progress-fill" data-target="{{ d['Strength'] * 20 }}"></div>
+                        </div>
+                        <span class="progress-label">{{ d['Strength'] * 20 }}%</span>
+                    </div>
+
+                    <p class="topic-exam">
+                        <span class="topic-exam-icon" aria-hidden="true">🗓️</span>
+                        Exam on {{ d['Date of Exam'] }}
+                    </p>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state animate-in">
+            <p class="empty-icon" aria-hidden="true">🗂️</p>
+            <h2>No subjects yet</h2>
+            <p class="muted">Add your first subject to start tracking your study plan.</p>
+            <a class="btn btn-primary" href="{{ url_for('add') }}">+ Add Topic</a>
+        </div>
+    {% endif %}
+
+{% endif %}
+
+{% endblock %}

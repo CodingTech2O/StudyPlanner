@@ -1,3 +1,14 @@
 [
-    
+    {
+        "Subject": "SST",
+        "Strength": 1,
+        "Date of Exam": "2026-10-21",
+        "Delete URL": "/delete/SST"
+    },
+    {
+        "Subject": "ENglish",
+        "Strength": 3,
+        "Date of Exam": "2026-10-01",
+        "Delete URL": "/delete/ENglish"
+    }
 ]
