@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Planner</title>
+</head>
+<body>
+    
+    {% for d in data %}
+        <p>Subject: {{d['Subject']}}</p>
+        <p>Strength: {{d['Strength'] * 20}}%</p>
+        <p>Date of Exam: {{d['Date of Exam']}}</p>
+        <p><a href="{{d['Delete URL']}}">Delete</a></p>
+
+    {% endfor %}
+    <a href="{{url_for('add')}}">Add Topic</a>
+        
+</body>
+</html>

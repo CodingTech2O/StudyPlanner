@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add a subject</title>
+</head>
+<body>
+    <form method="post">
+        {{form.hidden_tag()}}
+        {{form.subject.label}}{{form.subject}}
+        {{form.strength.label}}{{form.strength}}
+        {{form.date_of_exam.label}}{{form.date_of_exam}}
+        {{form.submit()}}
+    </form>
+</body>
+</html>
