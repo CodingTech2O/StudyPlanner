@@ -8,6 +8,7 @@ A small Flask app for planning your study time: log how many hours you can commi
 - **Add subjects** &mdash; each with a confidence rating (1-5, via a slider) and an exam date.
 - **Visual dashboard** &mdash; subjects are shown as cards with an animated, colour-coded confidence bar (red &rarr; amber &rarr; green).
 - **Auto-generated study plan** &mdash; once you've set your hours and added subjects, each card shows how many of those hours it should get, weighted by how weak you are in it and how soon its exam is (see `planner.py`).
+- **Day-by-day schedule** &mdash; the hours are laid out per day from today until the last exam eve (see [How the schedule works](#how-the-schedule-works)).
 - **Delete subjects** &mdash; remove a topic once you've covered it (with a confirmation prompt).
 - **Responsive, animated UI** &mdash; light/dark theme (follows your OS setting), smooth transitions, and no build step required.
 
@@ -50,13 +51,25 @@ A small Flask app for planning your study time: log how many hours you can commi
 3. Your dashboard shows each subject as a card with a confidence bar and exam date.
 4. Click the **&times;** on a card to remove a subject you've finished with.
 
+## How the schedule works
+
+Each subject's allocated hours (weighted by weakness and exam date) are placed on the calendar like this:
+
+- **Exam eve:** 10% of a subject's hours are kept for the day before its exam.
+- **Day 1, 3, 5, ... (focus, 8:2):** the subject with the most hours left gets 80% of the day, the subject with the fewest hours left gets 20%.
+- **Day 2, 4, 6, ... (revision, 3:7):** 30% of the day revises your weakest subject, 70% studies the subject with the most hours left (if that's the same subject, the next one down gets the 70%).
+- **Day length:** the hours still to place divided by the days still to go, so everything is finished by the last exam eve.
+- **Catch-up:** the split above doesn't look at exam dates, so a subject whose exam comes early can run out of days. Its leftover hours are shown as a red *Catch-up* block on its exam eve.
+
+The rules live in constants at the top of `planner.py` (`EXAM_EVE_SHARE`, `FOCUS_DAY_SPLIT`, `REVISION_DAY_SPLIT`).
+
 ## Project structure
 
 ```text
 Study Planner/
 ├── app.py                 # Flask routes (index, add_topic, delete)
 ├── forms.py                # WTForms definitions (TopicForm, TotalStudyTime)
-├── planner.py               # Study-hour allocation algorithm
+├── planner.py               # Study-hour allocation + day-by-day schedule
 ├── data/
 │   └── topics.json         # Stored subjects
 ├── templates/

@@ -12,6 +12,11 @@
     --color-low: #e5484d;
     --color-mid: #f5a524;
     --color-high: #17a673;
+    --color-primary-soft: #eceefe;
+    --color-warn: #a15c00;
+    --color-warn-soft: #fff3dc;
+    --color-ok: #0d7a55;
+    --color-ok-soft: #dff5ec;
 
     --radius-sm: 8px;
     --radius-md: 14px;
@@ -38,6 +43,11 @@
         --color-primary-hover: #a5b4fc;
         --color-danger: #f47575;
         --color-danger-bg: #3a1f22;
+        --color-primary-soft: #262b4d;
+        --color-warn: #f5b34d;
+        --color-warn-soft: #3a2e17;
+        --color-ok: #4cc9a0;
+        --color-ok-soft: #16332a;
         --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
         --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
         --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55);
@@ -323,6 +333,148 @@ a:hover {
     margin: 0.35rem 0 0;
 }
 
+/* ---------- Day-by-day schedule ---------- */
+.schedule {
+    margin-top: 3rem;
+}
+
+.schedule-head {
+    margin-bottom: 1.25rem;
+}
+
+.schedule-note {
+    margin-top: 0.75rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+    font-size: 0.9rem;
+}
+
+.day-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.day-card {
+    display: grid;
+    grid-template-columns: 96px 1fr auto;
+    align-items: center;
+    gap: 1.25rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 0.9rem 1.2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.day-date {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+}
+
+.day-weekday {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+}
+
+.day-number {
+    font-family: var(--font-heading);
+    font-weight: 600;
+}
+
+.day-today {
+    align-self: flex-start;
+    margin-top: 0.25rem;
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.block-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.block {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.block-subject {
+    font-weight: 600;
+    word-break: break-word;
+}
+
+.block-kind {
+    padding: 0.05rem 0.55rem;
+    border-radius: 999px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.block-revision .block-kind {
+    background: var(--color-warn-soft);
+    color: var(--color-warn);
+}
+
+.block-exam-eve .block-kind {
+    background: var(--color-ok-soft);
+    color: var(--color-ok);
+}
+
+.block-catch-up .block-kind {
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+}
+
+.block-time {
+    margin-left: auto;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    white-space: nowrap;
+}
+
+.block-rest {
+    font-size: 0.9rem;
+}
+
+.day-total {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 64px;
+}
+
+.day-total-time {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.day-split {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+}
+
 /* ---------- Empty state ---------- */
 .empty-state {
     text-align: center;
@@ -543,6 +695,16 @@ input[type="submit"]:active {
 
     .dashboard-head {
         align-items: flex-start;
+    }
+
+    .day-card {
+        grid-template-columns: 1fr auto;
+        gap: 0.6rem 1rem;
+    }
+
+    .block-list {
+        grid-column: 1 / -1;
+        grid-row: 2;
     }
 
     .onboarding-card,

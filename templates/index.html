@@ -60,6 +60,54 @@
                 </article>
             {% endfor %}
         </div>
+
+        {% if schedule %}
+            <section class="schedule">
+                <div class="schedule-head animate-in">
+                    <h2>Day-by-day plan</h2>
+                    <p class="muted">
+                        Days alternate between an 8:2 focus split (most hours left : fewest hours left)
+                        and a 3:7 split (revise your weakest subject : study the one with the most hours left).
+                        Each subject keeps 10% of its hours for the day before its exam.
+                    </p>
+                    {% if has_catch_up %}
+                        <p class="schedule-note">
+                            Some hours didn't fit before their exam, so they're added to that subject's exam eve as <strong>Catch-up</strong>.
+                            Giving more hours per day, or adding subjects earlier, avoids this.
+                        </p>
+                    {% endif %}
+                </div>
+
+                <ol class="day-list">
+                    {% for day in schedule %}
+                        <li class="day-card animate-in" style="--stagger: {{ [loop.index, 8]|min }};">
+                            <div class="day-date">
+                                <span class="day-weekday">{{ day['Date'].strftime('%a') }}</span>
+                                <span class="day-number">{{ day['Date'].day }} {{ day['Date'].strftime('%b') }}</span>
+                                {% if loop.first %}<span class="day-today">Today</span>{% endif %}
+                            </div>
+
+                            <ul class="block-list">
+                                {% for block in day['Blocks'] %}
+                                    <li class="block block-{{ block['Kind']|lower|replace(' ', '-') }}">
+                                        <span class="block-subject">{{ block['Subject'] }}</span>
+                                        <span class="block-kind">{{ block['Kind'] }}</span>
+                                        <span class="block-time">{{ block['Minutes']|duration }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="block-rest muted">Rest day</li>
+                                {% endfor %}
+                            </ul>
+
+                            <div class="day-total">
+                                <span class="day-total-time">{{ day['Minutes']|duration }}</span>
+                                {% if day['Split'] %}<span class="day-split">{{ day['Split'] }}</span>{% endif %}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ol>
+            </section>
+        {% endif %}
     {% else %}
         <div class="empty-state animate-in">
             <p class="empty-icon" aria-hidden="true">🗂️</p>

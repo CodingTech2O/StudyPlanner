@@ -3,7 +3,7 @@ from flask import Flask, render_template, redirect, url_for
 import os
 from dotenv import load_dotenv
 from forms import TopicForm, TotalStudyTime
-from planner import compute_study_plan
+from planner import compute_study_plan, build_daily_schedule
 
 load_dotenv()
 
@@ -11,6 +11,16 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key-change-me")
 
 total_time_to_study = 0
+
+
+@app.template_filter("duration")
+def duration(minutes):
+    """Format minutes as '1h 20m', '2h' or '45m'."""
+    hours, mins = divmod(minutes, 60)
+    if hours and mins:
+        return f"{hours}h {mins}m"
+    return f"{hours}h" if hours else f"{mins}m"
+
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -20,6 +30,7 @@ def index():
         data = json.load(f)
 
     form = None
+    schedule = []
 
     if total_time_to_study == 0:
         form = TotalStudyTime()
@@ -29,11 +40,20 @@ def index():
             return redirect(url_for("index"))
     elif data:
         data = compute_study_plan(data, total_time_to_study)
+        schedule = build_daily_schedule(data)
+
+    has_catch_up = any(
+        block["Kind"] == "Catch-up"
+        for day in schedule
+        for block in day["Blocks"]
+    )
 
     return render_template(
         "index.html",
         data=data,
         form=form,
+        schedule=schedule,
+        has_catch_up=has_catch_up,
         total_time_to_study=total_time_to_study
     )
 
