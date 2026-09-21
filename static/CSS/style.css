@@ -313,6 +313,16 @@ a:hover {
     margin: 0;
 }
 
+.topic-plan {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin: 0.35rem 0 0;
+}
+
 /* ---------- Empty state ---------- */
 .empty-state {
     text-align: center;

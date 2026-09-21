@@ -3,6 +3,7 @@ from flask import Flask, render_template, redirect, url_for
 import os
 from dotenv import load_dotenv
 from forms import TopicForm, TotalStudyTime
+from planner import compute_study_plan
 
 load_dotenv()
 
@@ -26,6 +27,8 @@ def index():
         if form.validate_on_submit():
             total_time_to_study = form.time.data
             return redirect(url_for("index"))
+    elif data:
+        data = compute_study_plan(data, total_time_to_study)
 
     return render_template(
         "index.html",

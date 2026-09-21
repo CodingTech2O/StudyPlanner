@@ -7,6 +7,7 @@ A small Flask app for planning your study time: log how many hours you can commi
 - **Set your study budget** &mdash; enter the total hours you can give, once, at the start.
 - **Add subjects** &mdash; each with a confidence rating (1-5, via a slider) and an exam date.
 - **Visual dashboard** &mdash; subjects are shown as cards with an animated, colour-coded confidence bar (red &rarr; amber &rarr; green).
+- **Auto-generated study plan** &mdash; once you've set your hours and added subjects, each card shows how many of those hours it should get, weighted by how weak you are in it and how soon its exam is (see `planner.py`).
 - **Delete subjects** &mdash; remove a topic once you've covered it (with a confirmation prompt).
 - **Responsive, animated UI** &mdash; light/dark theme (follows your OS setting), smooth transitions, and no build step required.
 
@@ -55,6 +56,7 @@ A small Flask app for planning your study time: log how many hours you can commi
 Study Planner/
 ├── app.py                 # Flask routes (index, add_topic, delete)
 ├── forms.py                # WTForms definitions (TopicForm, TotalStudyTime)
+├── planner.py               # Study-hour allocation algorithm
 ├── data/
 │   └── topics.json         # Stored subjects
 ├── templates/

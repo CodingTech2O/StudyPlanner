@@ -50,6 +50,13 @@
                         <span class="topic-exam-icon" aria-hidden="true">🗓️</span>
                         Exam on {{ d['Date of Exam'] }}
                     </p>
+
+                    {% if d['Allocated Hours'] is defined %}
+                        <p class="topic-plan">
+                            <span class="topic-plan-icon" aria-hidden="true">⏱️</span>
+                            {{ d['Allocated Hours'] }} hrs planned
+                        </p>
+                    {% endif %}
                 </article>
             {% endfor %}
         </div>
